@@ -1,0 +1,9 @@
+name: Digital_Marketing_Campaign_Automation
+
+conda_env: conda.yaml
+
+entry_points:
+  main:
+    parameters:
+      data_dir: {type: path, default: "digital_marketing_campaign_dataset_preprocessing"}
+    command: "python modelling.py --data_dir {data_dir}"

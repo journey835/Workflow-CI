@@ -1,0 +1,39 @@
+name: Machine Learning CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  train-and-build-docker:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+
+    - name: Install Dependencies
+      run: |
+        pip install mlflow pandas numpy scikit-learn
+
+    - name: Run MLflow Project (Training)
+      run: |
+        mlflow run MLProject --entry-point main
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build and Push Docker Image via MLflow
+      run: |
+        MODEL_PATH=$(python -c "import mlflow; print(mlflow.search_runs(experiment_names=['Digital_Marketing_Campaign_CI'])['artifact_uri'].iloc[0].replace('file://', ''))")/model
+        
+        mlflow models build-docker -m "$MODEL_PATH" -n "journeyme/marketing-campaign-model:latest"
+        
+        docker push journeyme/marketing-campaign-model:latest

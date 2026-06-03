@@ -1,0 +1,11 @@
+name: marketing_ci_env
+channels:
+  - conda-forge
+dependencies:
+  - python=3.13
+  - pip
+  - pip:
+    - pandas==2.3.3
+    - numpy==2.4.6
+    - scikit-learn==1.8.0
+    - mlflow==3.13.0
