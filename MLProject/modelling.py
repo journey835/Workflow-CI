@@ -12,14 +12,11 @@ def train_base_model(data_dir):
     y_train = pd.read_csv(os.path.join(data_dir, "y_train.csv")).values.ravel()
     y_test = pd.read_csv(os.path.join(data_dir, "y_test.csv")).values.ravel()
     
-    mlflow.set_tracking_uri(os.environ.get("MLFLOW_TRACKING_URI", "runs:/"))
-    mlflow.set_experiment("Digital_Marketing_Campaign_CI")
     mlflow.sklearn.autolog()
     
-    with mlflow.start_run(run_name="CI_Docker_Execution"):
-        model = RandomForestClassifier(random_state=42)
-        model.fit(X_train, y_train)
-        print("Model berhasil dilatih di dalam Docker Container!")
+    model = RandomForestClassifier(random_state=42)
+    model.fit(X_train, y_train)
+    print("Model berhasil dilatih dengan sukses!")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

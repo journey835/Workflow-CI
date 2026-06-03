@@ -7,6 +7,10 @@ on:
 jobs:
   train-and-build-docker:
     runs-on: ubuntu-latest
+    env:
+      MLFLOW_TRACKING_URI: "file://${{ github.workspace }}/mlruns"
+      MLFLOW_ALLOW_FILE_STORE: "true"
+    
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
@@ -22,8 +26,7 @@ jobs:
 
     - name: Run MLflow Project (Training)
       run: |
-        # KOREKSI: Tambahkan --env-manager local agar tidak error mencari Conda
-        mlflow run MLProject --entry-point main --env-manager local
+        mlflow run MLProject --entry-point main --env-manager local --experiment-name "Digital_Marketing_Campaign_CI"
 
     - name: Log in to Docker Hub
       uses: docker/login-action@v3
@@ -33,8 +36,8 @@ jobs:
 
     - name: Build and Push Docker Image via MLflow
       run: |
-        MODEL_PATH=$(python -c "import mlflow; print(mlflow.search_runs(experiment_names=['Digital_Marketing_Campaign_CI'])['artifact_uri'].iloc[0].replace('file://', ''))")/model
+        RUN_ID=$(python -c "import mlflow; print(mlflow.search_runs(experiment_names=['Digital_Marketing_Campaign_CI'])['run_id'].iloc[0])")
         
-        mlflow models build-docker -m "$MODEL_PATH" -n "journeyme/marketing-campaign-model:latest"
+        mlflow models build-docker -m "runs:/$RUN_ID/model" -n "journeyme/marketing-campaign-model:latest"
         
         docker push journeyme/marketing-campaign-model:latest
